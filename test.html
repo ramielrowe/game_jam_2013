@@ -3,14 +3,22 @@
 <style type="text/css">
 
     #game-div {
-        width: 1280px;
+        width: 1480px;
         height: 720px;
         margin-left: auto;
         margin-right: auto;
     }
+
+    #debug-out {
+        width: 150px;
+        border:1px solid black;
+        padding: 10px;
+        float: right;
+    }
     
     #main-canvas {
         border:1px solid black;
+        float: left;
     }
     
 
@@ -33,6 +41,10 @@
 
     <div id="game-div">
         <canvas id="main-canvas" width=1280 height=720>
+        </canvas>
+        <div id="debug-out">
+            Debug<br/>
+        </div>
     </div>
 
 <body>

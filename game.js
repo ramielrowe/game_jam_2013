@@ -35,31 +35,40 @@ var Player = (function() {
     }
     
     Player.prototype.update = function(state, d) {
-        old_x = this._x
-        old_y = this._y
-        if(state.is_down(KEY_RIGHT)){
-            this._x += PLAYER_MOVE_RATE * d
-            if(this._x + PLAYER_WIDTH >= state.width){
-                this._x = state.width - PLAYER_WIDTH
+        if(!state.paused) {
+        
+            old_x = this._x
+            old_y = this._y
+            if(state.is_down(KEY_RIGHT)){
+                this._x += PLAYER_MOVE_RATE * d
+                if(this._x + PLAYER_WIDTH >= state.width){
+                    this._x = state.width - PLAYER_WIDTH
+                }
+            }
+            if(state.is_down(KEY_LEFT)){
+                this._x -= PLAYER_MOVE_RATE * d
+                if(this._x <= 0){
+                    this._x = old_x
+                }
+            }
+            if(state.is_down(KEY_UP)){
+                this._y -= PLAYER_MOVE_RATE * d
+                if(this._y <= 0){
+                    this._y = old_y
+                }
+            }
+            if(state.is_down(KEY_DOWN)){
+                this._y += PLAYER_MOVE_RATE * d
+                if(this._y + PLAYER_HEIGHT >= state.height){
+                    this._y = state.height - PLAYER_HEIGHT
+                }
             }
         }
-        if(state.is_down(KEY_LEFT)){
-            this._x -= PLAYER_MOVE_RATE * d
-            if(this._x <= 0){
-                this._x = old_x
-            }
-        }
-        if(state.is_down(KEY_UP)){
-            this._y -= PLAYER_MOVE_RATE * d
-            if(this._y <= 0){
-                this._y = old_y
-            }
-        }
-        if(state.is_down(KEY_DOWN)){
-            this._y += PLAYER_MOVE_RATE * d
-            if(this._y + PLAYER_HEIGHT >= state.height){
-                this._y = state.height - PLAYER_HEIGHT
-            }
+        
+        if(DEBUG){
+            var debug_out = document.getElementById("debug-out")
+            var msg = "Player: "+this._x+", "+this._y+"<br/>"
+            debug_out.innerHTML = debug_out.innerHTML + msg
         }
     }
     
@@ -78,6 +87,7 @@ var GameState = (function() {
     
     var width
     var height
+    var paused
 
     var _keyStates
     var _keyClicks
@@ -141,6 +151,7 @@ var Game = (function() {
         this._state = new GameState()
         this._state.width = canvas.width
         this._state.height = canvas.height
+        this._state.paused = false
         
         var state = this._state
         
@@ -159,6 +170,10 @@ var Game = (function() {
     }
     
     Game.prototype._update_and_draw = function(self, last_run) {
+        if(DEBUG){
+            var debug_out = document.getElementById('debug-out')
+            debug_out.innerHTML = "Debug<br/>"
+        }
         var start = new Date().getTime()
         var delta =  start - last_run
         
@@ -167,16 +182,15 @@ var Game = (function() {
         
         if(self._state.is_clicked(KEY_F2)){
             self._paused = !self._paused
+            self._state.paused = self._paused
         }
         
         if(self._state.is_clicked(KEY_F9)){
             DEBUG = !DEBUG
         }
         
-        if(!self._paused){
-            for(var i = 0; i < self._gameObjects.length; i++) {
+        for(var i = 0; i < self._gameObjects.length; i++) {
                 self._gameObjects[i].update(self._state, delta)
-            }
         }
         
         for(var i = 0; i < self._gameObjects.length; i++) {
