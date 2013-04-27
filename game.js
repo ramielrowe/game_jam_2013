@@ -1,8 +1,11 @@
-var DEBUG = false
+var DEBUG = true
 
 var PLAYER_MOVE_RATE = 0.5
 var PLAYER_HEIGHT = 100
 var PLAYER_WIDTH = 60
+
+var ENEMY_HEIGHT = 60
+var ENEMY_WIDTH = 21
 
 var KEY_UP = 38
 var KEY_DOWN = 40
@@ -10,6 +13,45 @@ var KEY_LEFT = 37
 var KEY_RIGHT = 39
 var KEY_F2 = 113
 var KEY_F9 = 120
+
+var Enemy = (function() {
+
+    var _x
+    var _y
+    var _image
+    
+    function Enemy(x, y) {
+        this._x = x
+        this._y = y
+        this._image = new Image()
+        this._image.src = "enemy.png"
+    }
+    
+    Enemy.prototype.get_shape = function() {
+        var polygon = new Polygon({'x': this._x, 'y': this._y}, "red")
+        polygon.addPoint({'x': 0, 'y': 0})
+        polygon.addPoint({'x': ENEMY_WIDTH, 'y': 0})
+        polygon.addPoint({'x': ENEMY_WIDTH, 'y': ENEMY_HEIGHT})
+        polygon.addPoint({'x': 0, 'y': ENEMY_HEIGHT})
+        return polygon
+    }
+    
+    Enemy.prototype.update = function(state, d) {
+        if(!state.paused) {
+            
+        }
+    }
+    
+    Enemy.prototype.draw = function(state, context, d) {
+        context.drawImage(this._image, this._x, this._y)
+        if(DEBUG){
+            this.get_shape().draw(context)
+        }
+    }
+    
+    return Enemy
+
+})()
 
 var Player = (function() {
 
@@ -140,14 +182,16 @@ var Game = (function() {
     var _running = false
     var _paused = false
     
-    var _gameObjects
     var _state
+    
+    var _player
+    var _enemies
     
     function Game(canvas, target_fps) {
         this._canvas = canvas
         this._context = canvas.getContext("2d")
         this._target_fps = target_fps
-        this._gameObjects = new Array()
+        this._enemies = new Array()
         this._state = new GameState()
         this._state.width = canvas.width
         this._state.height = canvas.height
@@ -166,7 +210,12 @@ var Game = (function() {
         document.addEventListener('keydown', key_down)
         document.addEventListener('keyup', key_up)
         
-        this._gameObjects.push(new Player(50, 50))
+        this._enemies.push(new Enemy(350, 450))
+        this._enemies.push(new Enemy(500, 450))
+        this._enemies.push(new Enemy(650, 450))
+        this._enemies.push(new Enemy(800, 450))
+        
+        this._player = new Player(590, 610)
     }
     
     Game.prototype._update_and_draw = function(self, last_run) {
@@ -189,13 +238,15 @@ var Game = (function() {
             DEBUG = !DEBUG
         }
         
-        for(var i = 0; i < self._gameObjects.length; i++) {
-                self._gameObjects[i].update(self._state, delta)
+        self._player.update(self._state, delta)
+        for(var i = 0; i < self._enemies.length; i++) {
+                self._enemies[i].update(self._state, delta)
         }
         
-        for(var i = 0; i < self._gameObjects.length; i++) {
-            self._gameObjects[i].draw(self._state, self._context, delta)
+        for(var i = 0; i < self._enemies.length; i++) {
+            self._enemies[i].draw(self._state, self._context, delta)
         }
+        self._player.draw(self._state, self._context, delta)
         
         if(self._paused){
             self._context.fillStyle = "red"
