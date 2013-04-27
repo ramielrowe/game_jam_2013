@@ -1,4 +1,4 @@
-var DEBUG = true
+var DEBUG = false
 
 var PLAYER_MOVE_RATE = 0.5
 var PLAYER_HEIGHT = 100
@@ -34,6 +34,11 @@ var Enemy = (function() {
         polygon.addPoint({'x': ENEMY_WIDTH, 'y': ENEMY_HEIGHT})
         polygon.addPoint({'x': 0, 'y': ENEMY_HEIGHT})
         return polygon
+    }
+    
+    Enemy.prototype.collide_player = function() {
+        this._imge = new Image()
+        this._image.src = "enemy_dead.png"
     }
     
     Enemy.prototype.update = function(state, d) {
@@ -241,6 +246,12 @@ var Game = (function() {
         self._player.update(self._state, delta)
         for(var i = 0; i < self._enemies.length; i++) {
                 self._enemies[i].update(self._state, delta)
+        }
+        
+        for(var i = 0; i < self._enemies.length; i++) {
+                if(self._enemies[i].get_shape().intersectsWith(self._player.get_shape())){
+                    self._enemies[i].collide_player()
+                }
         }
         
         for(var i = 0; i < self._enemies.length; i++) {
