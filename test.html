@@ -1,0 +1,39 @@
+<html>
+
+<style type="text/css">
+
+    #game-div {
+        width: 1280px;
+        height: 720px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    #main-canvas {
+        border:1px solid black;
+    }
+    
+
+</style>
+
+<script type="text/javascript" src="game.js"></script>
+
+<script type="text/javascript">
+    var game
+    function onLoad() {
+        var canvas = document.getElementById("main-canvas")
+        
+        game = new Game(canvas, 60)
+        game.run()
+    }
+</script>
+
+<body onload="javascript:onLoad();">
+
+    <div id="game-div">
+        <canvas id="main-canvas" width=1280 height=720>
+    </div>
+
+<body>
+
+</html>
