@@ -26,6 +26,8 @@ var Enemy = (function() {
         this._y = y
         this._image = new Image()
         this._image.src = "enemy.png"
+        this._dead_image = new Image()
+        this._dead_image.src = "enemy_dead.png"
         this.alive = true
     }
     
@@ -39,8 +41,6 @@ var Enemy = (function() {
     }
     
     Enemy.prototype.collide_player = function() {
-        this._imge = new Image()
-        this._image.src = "enemy_dead.png"
         this.alive = false
     }
     
@@ -51,7 +51,12 @@ var Enemy = (function() {
     }
     
     Enemy.prototype.draw = function(state, context, d) {
-        context.drawImage(this._image, this._x, this._y)
+        if(this.alive){
+            context.drawImage(this._image, this._x, this._y)
+        }else{
+            context.drawImage(this._dead_image, this._x, this._y)
+        }
+        
         if(DEBUG){
             this.get_shape().draw(context)
         }
