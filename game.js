@@ -1,6 +1,15 @@
+var DEBUG = false
+
 var PLAYER_MOVE_RATE = 0.5
 var PLAYER_HEIGHT = 100
 var PLAYER_WIDTH = 60
+
+var KEY_UP = 38
+var KEY_DOWN = 40
+var KEY_LEFT = 37
+var KEY_RIGHT = 39
+var KEY_F2 = 113
+var KEY_F9 = 120
 
 var Player = (function() {
 
@@ -13,30 +22,40 @@ var Player = (function() {
         this._y = y
         this._image = new Image()
         this._image.src = "car.png"
+        
+    }
+    
+    Player.prototype.get_shape = function() {
+        var polygon = new Polygon({'x': this._x, 'y': this._y}, "green")
+        polygon.addPoint({'x': 0, 'y': 0})
+        polygon.addPoint({'x': PLAYER_WIDTH, 'y': 0})
+        polygon.addPoint({'x': PLAYER_WIDTH, 'y': PLAYER_HEIGHT})
+        polygon.addPoint({'x': 0, 'y': PLAYER_HEIGHT})
+        return polygon
     }
     
     Player.prototype.update = function(state, d) {
         old_x = this._x
         old_y = this._y
-        if(state.is_down(39)){
+        if(state.is_down(KEY_RIGHT)){
             this._x += PLAYER_MOVE_RATE * d
             if(this._x + PLAYER_WIDTH >= state.width){
                 this._x = state.width - PLAYER_WIDTH
             }
         }
-        if(state.is_down(37)){
+        if(state.is_down(KEY_LEFT)){
             this._x -= PLAYER_MOVE_RATE * d
             if(this._x <= 0){
                 this._x = old_x
             }
         }
-        if(state.is_down(38)){
+        if(state.is_down(KEY_UP)){
             this._y -= PLAYER_MOVE_RATE * d
             if(this._y <= 0){
                 this._y = old_y
             }
         }
-        if(state.is_down(40)){
+        if(state.is_down(KEY_DOWN)){
             this._y += PLAYER_MOVE_RATE * d
             if(this._y + PLAYER_HEIGHT >= state.height){
                 this._y = state.height - PLAYER_HEIGHT
@@ -46,6 +65,9 @@ var Player = (function() {
     
     Player.prototype.draw = function(state, context, d) {
         context.drawImage(this._image, this._x, this._y)
+        if(DEBUG){
+            this.get_shape().draw(context)
+        }
     }
     
     return Player
@@ -143,8 +165,12 @@ var Game = (function() {
         self._context.fillStyle = "white"
         self._context.fillRect(0, 0, self._canvas.width, self._canvas.height)
         
-        if(self._state.is_clicked(113)){
+        if(self._state.is_clicked(KEY_F2)){
             self._paused = !self._paused
+        }
+        
+        if(self._state.is_clicked(KEY_F9)){
+            DEBUG = !DEBUG
         }
         
         if(!self._paused){
