@@ -3,10 +3,15 @@ var DEBUG = false
 var PLAYER_MOVE_RATE = 0.5
 var PLAYER_HEIGHT = 100
 var PLAYER_WIDTH = 60
+var PLAYER_MAX_SPEED_MOD = 1.0
+var PLAYER_ACCEL_RATE = 0.015
+var PLAYER_DECEL_RATE = 0.005
 
 var ENEMY_HEIGHT = 60
 var ENEMY_WIDTH = 21
+var ENEMY_STICKY_FACTOR = 0.20
 
+var KEY_SPACE = 32
 var KEY_UP = 38
 var KEY_DOWN = 40
 var KEY_LEFT = 37
@@ -15,16 +20,13 @@ var KEY_F2 = 113
 var KEY_F9 = 120
 
 var Enemy = (function() {
-
-    var _x
-    var _y
-    var _image
     
     function Enemy(x, y) {
         this._x = x
         this._y = y
         this._image = new Image()
         this._image.src = "enemy.png"
+        this.alive = true
     }
     
     Enemy.prototype.get_shape = function() {
@@ -39,6 +41,7 @@ var Enemy = (function() {
     Enemy.prototype.collide_player = function() {
         this._imge = new Image()
         this._image.src = "enemy_dead.png"
+        this.alive = false
     }
     
     Enemy.prototype.update = function(state, d) {
@@ -59,17 +62,22 @@ var Enemy = (function() {
 })()
 
 var Player = (function() {
-
-    var _x
-    var _y
-    var _image
     
     function Player(x, y) {
         this._x = x
         this._y = y
         this._image = new Image()
         this._image.src = "car.png"
+        this._maxSpeed = PLAYER_MAX_SPEED_MOD
+        this._speed = 0
         
+    }
+    
+    Player.prototype.collide_enemy = function() {
+        this._maxSpeed -= ENEMY_STICKY_FACTOR
+        if(this._speed > this._maxSpeed){
+            this._speed = this._maxSpeed
+        }
     }
     
     Player.prototype.get_shape = function() {
@@ -84,8 +92,6 @@ var Player = (function() {
     Player.prototype.update = function(state, d) {
         if(!state.paused) {
         
-            old_x = this._x
-            old_y = this._y
             if(state.is_down(KEY_RIGHT)){
                 this._x += PLAYER_MOVE_RATE * d
                 if(this._x + PLAYER_WIDTH >= state.width){
@@ -95,19 +101,25 @@ var Player = (function() {
             if(state.is_down(KEY_LEFT)){
                 this._x -= PLAYER_MOVE_RATE * d
                 if(this._x <= 0){
-                    this._x = old_x
+                    this._x = 0
                 }
             }
-            if(state.is_down(KEY_UP)){
-                this._y -= PLAYER_MOVE_RATE * d
-                if(this._y <= 0){
-                    this._y = old_y
+            if(state.is_down(KEY_SPACE)){
+                this._speed += PLAYER_ACCEL_RATE
+                if(this._speed > this._maxSpeed){
+                    this._speed = this._maxSpeed
+                }
+            }else{
+                this._speed -= PLAYER_DECEL_RATE
+                if(this._speed < 0){
+                    this._speed = 0
                 }
             }
-            if(state.is_down(KEY_DOWN)){
-                this._y += PLAYER_MOVE_RATE * d
-                if(this._y + PLAYER_HEIGHT >= state.height){
-                    this._y = state.height - PLAYER_HEIGHT
+            
+            if(this._speed > 0){
+                this._y -= this._speed * d
+                if(this._y < 0){
+                    this._y = 0
                 }
             }
         }
@@ -131,13 +143,6 @@ var Player = (function() {
 })()
 
 var GameState = (function() {
-    
-    var width
-    var height
-    var paused
-
-    var _keyStates
-    var _keyClicks
 
     function GameState() {
         this._keyStates = new Array()
@@ -180,19 +185,10 @@ var GameState = (function() {
 })()
 
 var Game = (function() {
-    var _canvas
-    var _context
-    var _target_fps
-    
-    var _running = false
-    var _paused = false
-    
-    var _state
-    
-    var _player
-    var _enemies
     
     function Game(canvas, target_fps) {
+        this._running = false
+        this._paused = false
         this._canvas = canvas
         this._context = canvas.getContext("2d")
         this._target_fps = target_fps
@@ -249,8 +245,10 @@ var Game = (function() {
         }
         
         for(var i = 0; i < self._enemies.length; i++) {
-                if(self._enemies[i].get_shape().intersectsWith(self._player.get_shape())){
+                if(self._enemies[i].alive &&
+                       self._enemies[i].get_shape().intersectsWith(self._player.get_shape())){
                     self._enemies[i].collide_player()
+                    self._player.collide_enemy()
                 }
         }
         
