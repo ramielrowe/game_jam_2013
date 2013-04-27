@@ -1,33 +1,51 @@
 var PLAYER_MOVE_RATE = 0.5
+var PLAYER_HEIGHT = 100
+var PLAYER_WIDTH = 60
 
 var Player = (function() {
 
     var _x
     var _y
+    var _image
     
     function Player(x, y) {
         this._x = x
         this._y = y
+        this._image = new Image()
+        this._image.src = "car.png"
     }
     
     Player.prototype.update = function(state, d) {
+        old_x = this._x
+        old_y = this._y
         if(state.is_down(39)){
             this._x += PLAYER_MOVE_RATE * d
+            if(this._x + PLAYER_WIDTH >= state.width){
+                this._x = state.width - PLAYER_WIDTH
+            }
         }
         if(state.is_down(37)){
             this._x -= PLAYER_MOVE_RATE * d
+            if(this._x <= 0){
+                this._x = old_x
+            }
         }
         if(state.is_down(38)){
             this._y -= PLAYER_MOVE_RATE * d
+            if(this._y <= 0){
+                this._y = old_y
+            }
         }
         if(state.is_down(40)){
             this._y += PLAYER_MOVE_RATE * d
+            if(this._y + PLAYER_HEIGHT >= state.height){
+                this._y = state.height - PLAYER_HEIGHT
+            }
         }
     }
     
     Player.prototype.draw = function(state, context, d) {
-        context.fillStyle = "black"
-        context.fillText(d, this._x, this._y)
+        context.drawImage(this._image, this._x, this._y)
     }
     
     return Player
@@ -35,6 +53,9 @@ var Player = (function() {
 })()
 
 var GameState = (function() {
+    
+    var width
+    var height
 
     var _keyStates
     var _keyClicks
@@ -96,6 +117,8 @@ var Game = (function() {
         this._target_fps = target_fps
         this._gameObjects = new Array()
         this._state = new GameState()
+        this._state.width = canvas.width
+        this._state.height = canvas.height
         
         var state = this._state
         
