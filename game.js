@@ -126,7 +126,7 @@ var Player = (function() {
         
         if(DEBUG){
             var debug_out = document.getElementById("debug-out")
-            var msg = "Player: "+this._x+", "+this._y+"<br/>"
+            var msg = "Player:<br/>Location: "+this._x+","+this._y+"<br/>Speed: "+this._speed+"<br/>Max Speed: "+this._maxSpeed+"</br>"
             debug_out.innerHTML = debug_out.innerHTML + msg
         }
     }
