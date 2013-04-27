@@ -143,12 +143,27 @@ var Game = (function() {
         self._context.fillStyle = "white"
         self._context.fillRect(0, 0, self._canvas.width, self._canvas.height)
         
-        for(var i = 0; i < self._gameObjects.length; i++) {
-            self._gameObjects[i].update(self._state, delta)
+        if(self._state.is_clicked(113)){
+            self._paused = !self._paused
+        }
+        
+        if(!self._paused){
+            for(var i = 0; i < self._gameObjects.length; i++) {
+                self._gameObjects[i].update(self._state, delta)
+            }
         }
         
         for(var i = 0; i < self._gameObjects.length; i++) {
             self._gameObjects[i].draw(self._state, self._context, delta)
+        }
+        
+        if(self._paused){
+            self._context.fillStyle = "red"
+            self._context.font = "30px Arial"
+            var paused_text = 'Game Paused'
+            self._context.fillText(paused_text,
+                                   (self._state.width/2)-paused_text.length*8,
+                                   (self._state.height/2)-10)
         }
         
         var end = new Date().getTime()
