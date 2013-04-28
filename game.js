@@ -1,5 +1,7 @@
 var DEBUG = false
 
+var PLAYER_START_X = 590
+var PLAYER_START_Y = 610
 var PLAYER_MOVE_RATE = 0.5
 var PLAYER_HEIGHT = 100
 var PLAYER_WIDTH = 60
@@ -40,6 +42,15 @@ var Enemy = (function() {
         return polygon
     }
     
+    Enemy.prototype.get_debug_shape = function(state) {
+        var polygon = new Polygon({'x': this._x, 'y': this._y-(state.player_y-PLAYER_START_Y)}, "red")
+        polygon.addPoint({'x': 0, 'y': 0})
+        polygon.addPoint({'x': ENEMY_WIDTH, 'y': 0})
+        polygon.addPoint({'x': ENEMY_WIDTH, 'y': ENEMY_HEIGHT})
+        polygon.addPoint({'x': 0, 'y': ENEMY_HEIGHT})
+        return polygon
+    }
+    
     Enemy.prototype.collide_player = function() {
         this.alive = false
     }
@@ -52,13 +63,13 @@ var Enemy = (function() {
     
     Enemy.prototype.draw = function(state, context, d) {
         if(this.alive){
-            context.drawImage(this._image, this._x, this._y)
+            context.drawImage(this._image, this._x, this._y-(state.player_y-PLAYER_START_Y))
         }else{
-            context.drawImage(this._dead_image, this._x, this._y)
+            context.drawImage(this._dead_image, this._x, this._y-(state.player_y-PLAYER_START_Y))
         }
         
         if(DEBUG){
-            this.get_shape().draw(context)
+            this.get_debug_shape(state).draw(context)
         }
     }
     
@@ -87,6 +98,15 @@ var Player = (function() {
     
     Player.prototype.get_shape = function() {
         var polygon = new Polygon({'x': this._x, 'y': this._y}, "green")
+        polygon.addPoint({'x': 0, 'y': 0})
+        polygon.addPoint({'x': PLAYER_WIDTH, 'y': 0})
+        polygon.addPoint({'x': PLAYER_WIDTH, 'y': PLAYER_HEIGHT})
+        polygon.addPoint({'x': 0, 'y': PLAYER_HEIGHT})
+        return polygon
+    }
+    
+    Player.prototype.get_debug_shape = function(state) {
+        var polygon = new Polygon({'x': this._x, 'y': this._y-(state.player_y-PLAYER_START_Y)}, "green")
         polygon.addPoint({'x': 0, 'y': 0})
         polygon.addPoint({'x': PLAYER_WIDTH, 'y': 0})
         polygon.addPoint({'x': PLAYER_WIDTH, 'y': PLAYER_HEIGHT})
@@ -123,9 +143,6 @@ var Player = (function() {
             
             if(this._speed > 0){
                 this._y -= this._speed * d
-                if(this._y < 0){
-                    this._y = 0
-                }
             }
         }
         
@@ -137,9 +154,9 @@ var Player = (function() {
     }
     
     Player.prototype.draw = function(state, context, d) {
-        context.drawImage(this._image, this._x, this._y)
+        context.drawImage(this._image, this._x, PLAYER_START_Y)
         if(DEBUG){
-            this.get_shape().draw(context)
+            this.get_debug_shape(state).draw(context)
         }
     }
     
@@ -221,7 +238,7 @@ var Game = (function() {
         this._enemies.push(new Enemy(650, 450))
         this._enemies.push(new Enemy(800, 450))
         
-        this._player = new Player(590, 610)
+        this._player = new Player(PLAYER_START_X, PLAYER_START_Y)
     }
     
     Game.prototype._update_and_draw = function(self, last_run) {
@@ -245,6 +262,8 @@ var Game = (function() {
         }
         
         self._player.update(self._state, delta)
+        self._state.player_x = self._player._x
+        self._state.player_y = self._player._y
         for(var i = 0; i < self._enemies.length; i++) {
                 self._enemies[i].update(self._state, delta)
         }
