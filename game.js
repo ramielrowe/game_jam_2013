@@ -91,6 +91,9 @@ var Player = (function() {
     
     Player.prototype.collide_enemy = function() {
         this._maxSpeed -= ENEMY_STICKY_FACTOR
+        if(this._maxSpeed < 0){
+            this._maxSpeed = 0
+        }
         if(this._speed > this._maxSpeed){
             this._speed = this._maxSpeed
         }
@@ -237,6 +240,22 @@ var Game = (function() {
         this._enemies.push(new Enemy(500, 450))
         this._enemies.push(new Enemy(650, 450))
         this._enemies.push(new Enemy(800, 450))
+        this._enemies.push(new Enemy(350, 0))
+        this._enemies.push(new Enemy(500, 0))
+        this._enemies.push(new Enemy(650, 0))
+        this._enemies.push(new Enemy(800, 0))
+        this._enemies.push(new Enemy(350, -450))
+        this._enemies.push(new Enemy(500, -450))
+        this._enemies.push(new Enemy(650, -450))
+        this._enemies.push(new Enemy(800, -450))
+        this._enemies.push(new Enemy(350, -900))
+        this._enemies.push(new Enemy(500, -900))
+        this._enemies.push(new Enemy(650, -900))
+        this._enemies.push(new Enemy(800, -900))
+        this._enemies.push(new Enemy(350, -1350))
+        this._enemies.push(new Enemy(500, -1350))
+        this._enemies.push(new Enemy(650, -1350))
+        this._enemies.push(new Enemy(800, -1350))
         
         this._player = new Player(PLAYER_START_X, PLAYER_START_Y)
     }
